@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculator</title>
+<style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#e9e6df;font-family:Arial,sans-serif}
+.calc{width:300px;background:#2b2f36;padding:16px;border-radius:20px}
+#display{background:#c9d6b8;border-radius:10px;padding:14px;text-align:right;font-size:32px;min-height:40px;overflow:hidden;margin-bottom:14px;font-family:monospace}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+button{height:56px;font-size:22px;border:0;border-radius:10px;background:#f6f4ee;cursor:pointer}
+button:active{opacity:.6}
+.op{background:#3d6b5e;color:#fff}
+.clr{background:#b5483a;color:#fff}
+.eq{background:#e0a93b}
+</style>
+</head>
+<body>
+<div class="calc">
+  <div id="display">0</div>
+  <div class="keys">
+    <button class="clr" onclick="clearAll()">C</button>
+    <button class="clr" onclick="del()">DEL</button>
+    <button class="op" onclick="press('%')">%</button>
+    <button class="op" onclick="press('/')">÷</button>
+    <button onclick="press('7')">7</button>
+    <button onclick="press('8')">8</button>
+    <button onclick="press('9')">9</button>
+    <button class="op" onclick="press('*')">×</button>
+    <button onclick="press('4')">4</button>
+    <button onclick="press('5')">5</button>
+    <button onclick="press('6')">6</button>
+    <button class="op" onclick="press('-')">−</button>
+    <button onclick="press('1')">1</button>
+    <button onclick="press('2')">2</button>
+    <button onclick="press('3')">3</button>
+    <button class="op" onclick="press('+')">+</button>
+    <button onclick="press('0')">0</button>
+    <button onclick="press('.')">.</button>
+    <button class="eq" onclick="calculate()" style="grid-column:span 2">=</button>
+  </div>
+</div>
+
+<script>
+var display = document.getElementById('display');
+var text = '';
+
+function show() {
+  display.textContent = text === '' ? '0' : text.replace(/\*/g, '×').replace(/\//g, '÷');
+}
+
+function press(c) {
+  var last = text.slice(-1);
+  var isOp = '+-*/%'.indexOf(c) !== -1;
+  if (isOp && text === '') return;
+  if (isOp && '+-*/%'.indexOf(last) !== -1) {
+    text = text.slice(0, -1);
+  }
+  text += c;
+  show();
+}
+
+function clearAll() {
+  text = '';
+  show();
+}
+
+function del() {
+  text = text.slice(0, -1);
+  show();
+}
+
+function calculate() {
+  if (text === '') return;
+  try {
+    var result = Function('"use strict";return (' + text.replace(/%/g, '/100') + ')')();
+    if (!isFinite(result)) {
+      text = '';
+      display.textContent = 'Error';
+      return;
+    }
+    text = String(parseFloat(result.toFixed(10)));
+    show();
+  } catch (e) {
+    text = '';
+    display.textContent = 'Error';
+  }
+}
+
+document.addEventListener('keydown', function (e) {
+  var k = e.key;
+  if ('0123456789.+-*/%'.indexOf(k) !== -1 && k.length === 1) press(k);
+  else if (k === 'Enter' || k === '=') calculate();
+  else if (k === 'Backspace') del();
+  else if (k === 'Escape' || k === 'c' || k === 'C') clearAll();
+});
+</script>
+</body>
+</html>
